@@ -6,20 +6,25 @@ import {
   Dispatch
 } from "react";
 
-type AsyncAction<S, A> = (dispatch: Dispatch<A>, state: S) => A;
-type ThunkDispatch<S, A> = (action: A | AsyncAction<S, A>) => void | A;
+type Initializer<R extends Reducer<any, any>, I> = (
+  arg: I & ReducerState<R> | I
+) => ReducerState<R>;
+type AsyncAction<S, A> = (dispatch: Dispatch<A>, state: S) => void;
+type ThunkDispatch<S, A> = (action: A | AsyncAction<S, A>) => void;
 
 let globalState: any = {};
 
-export function useThunkReducer<R extends Reducer<any, any>, I>(
+export default function useThunkReducer<R extends Reducer<any, any>, I>(
   reducer: R,
   initializerArg: I & ReducerState<R>,
-  initializer: (arg: I & ReducerState<R>) => ReducerState<R>
-) {
+  initializer?: Initializer<R, I>
+): [ReducerState<R>, ThunkDispatch<ReducerState<R>, ReducerAction<R>>] {
   type S = ReducerState<R>;
   type A = ReducerAction<R>;
 
-  const [state, dispatch] = useReducer(reducer, initializerArg, initializer);
+  const [state, dispatch] = initializer
+    ? useReducer(reducer, initializerArg, initializer)
+    : useReducer(reducer, initializerArg);
 
   globalState = state;
 
