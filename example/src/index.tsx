@@ -8,7 +8,7 @@ type Action = { type: "increase"; amount: number };
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "increase":
-      return { count: state.count - action.amount };
+      return { count: state.count + action.amount };
     default:
       throw new Error();
   }
